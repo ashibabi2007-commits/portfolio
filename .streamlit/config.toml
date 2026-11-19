@@ -1,0 +1,19 @@
+[server]
+enableStaticServing = true
+headless = true
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showSidebarNavigation = false
+
+[theme]
+base = "light"
+primaryColor = "#DE4E26"
+backgroundColor = "#F7F2E8"
+secondaryBackgroundColor = "#EFE7D6"
+textColor = "#15130F"
+font = "sans serif"
