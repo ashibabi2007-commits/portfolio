@@ -102,13 +102,11 @@ when it says *"Your app is live"*, click **View app**.
 > ⚠️ **If you get "ModuleNotFoundError"** — check that `requirements.txt` exists in the
 > repo root. It does, so this shouldn't happen.
 >
-> ⚠️ **If images are broken / the page looks unstyled** — open `.streamlit/config.toml`
-> in your repo and confirm this exact line exists:
-> ```toml
-> [server]
-> enableStaticServing = true
-> ```
-> It's already committed; this only matters if you've edited files by hand.
+> 💡 **Not required any more:** the site bundle is fully self-contained (fonts, images
+> and certificates inlined; JS shipped base64-encoded). It renders correctly even with
+> `enableStaticServing = false` and no `.streamlit/` folder at all — so a Windows
+> extractor dropping the hidden `.streamlit` folder can't break it.
+> `.streamlit/config.toml` is still committed for the theme + usage-stats settings.
 
 ---
 

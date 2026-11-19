@@ -69,14 +69,67 @@ def main() -> int:
     style_css = CSS.read_text(encoding="utf-8")
 
     # ---------------------------------------------------------------- Streamlit
-    # body + inline <style> + external <script>. Streamlit sanitises the HTML
-    # but keeps <style>/<script> when unsafe_allow_javascript=True, then
-    # re-creates the script so it executes.
-    inline_css = "/* fonts */\n" + fonts_css + "\n/* site */\n" + style_css
+    # Fully self-contained: CSS, JS, fonts AND images are inlined, and the
+    # résumé is embedded as a data URI. Nothing depends on
+    # server.enableStaticServing, so the app cannot break if .streamlit/
+    # never makes it into the repo (a common Windows-extraction problem).
+    static = ROOT / "static"
+
+    def data_uri(path: Path) -> str:
+        mime = {
+            ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+            ".svg": "image/svg+xml", ".woff2": "font/woff2", ".pdf": "application/pdf",
+        }.get(path.suffix.lower(), "application/octet-stream")
+        b64 = base64.b64encode(path.read_bytes()).decode("ascii")
+        return f"data:{mime};base64,{b64}"
+
+    def inline_ref(m):
+        whole, attr, ref = m.group(0), m.group(1), m.group(2)
+        target = static / ref
+        if not target.exists():
+            print(f"[build] WARNING missing asset: {ref}", file=sys.stderr)
+            return whole
+        return f'{attr}="{data_uri(target)}"'
+
+    # résumé first (must beat the generic inliner), embedded so it downloads
+    # instead of navigating the Streamlit iframe away from the app
+    resume = static / "docs" / "Ashish-Dash-Resume.pdf"
+    if resume.exists():
+        body_for_frag = body.replace(
+            'href="/app/static/docs/Ashish-Dash-Resume.pdf"',
+            f'href="{data_uri(resume)}" download="Ashish-Dash-Resume.pdf"',
+        )
+    else:
+        body_for_frag = body
+
+    frag_body = re.sub(r'(src|href)="/app/static/([^"]+)"', inline_ref, body_for_frag)
+
+    # certificate lightbox: swap the /app/static PDF link for the embedded original
+    def cert_target(m):
+        ref = m.group(1)                       # e.g. docs/nptel-datascience.pdf
+        stem = Path(ref).stem
+        target = static / "img" / "original" / f"{stem}.jpg"
+        if not target.exists():
+            print(f"[build] WARNING missing cert original: {ref}", file=sys.stderr)
+            return m.group(0)
+        return f'data-target="{data_uri(target)}"'
+
+    frag_body = re.sub(r'data-pdf="/app/static/([^"]+)"', cert_target, frag_body)
+
+    frag_fonts = re.sub(
+        r"url\(/app/static/fonts/([^)]+)\)",
+        lambda m: f"url({data_uri(static / 'fonts' / m.group(1))})",
+        fonts_css,
+    )
+    # Streamlit's sanitiser truncates inline <script> content at the first "<"
+    # (kills every `<`, `<=` and `&&` comparison). Ship the script base64-encoded
+    # and decode at runtime — the inline content is then pure alphanumerics.
+    js_b64 = base64.b64encode(JS.read_text(encoding="utf-8").encode("utf-8")).decode("ascii")
+
     fragment = (
-        "<style>\n" + inline_css + "\n</style>\n\n"
-        + body
-        + '\n\n<script src="/app/static/js/app.js"></script>\n'
+        "<style>\n" + frag_fonts + "\n" + style_css + "\n</style>\n\n"
+        + frag_body
+        + "\n\n<script>eval(decodeURIComponent(escape(atob(\"" + js_b64 + "\"))))</script>\n"
     )
     OUT_FRAGMENT.write_text(fragment, encoding="utf-8")
 
@@ -110,16 +163,6 @@ def main() -> int:
     # ---------------------------------------------------------------- Preview
     # One portable file: fonts + CSS + JS + images inlined as data URIs.
     # Perfect for double-click previews, email attachments and offline demos.
-    static = ROOT / "static"
-
-    def data_uri(path: Path) -> str:
-        mime = {
-            ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
-            ".svg": "image/svg+xml", ".woff2": "font/woff2",
-        }.get(path.suffix.lower(), "application/octet-stream")
-        b64 = base64.b64encode(path.read_bytes()).decode("ascii")
-        return f"data:{mime};base64,{b64}"
-
     inline_fonts = re.sub(
         r"url\(/app/static/fonts/([^)]+)\)",
         lambda m: f"url({data_uri(static / 'fonts' / m.group(1))})",

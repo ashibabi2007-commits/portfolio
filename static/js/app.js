@@ -35,6 +35,8 @@
   /* ---------------------------------------------------------------------
      1. Load-in
      --------------------------------------------------------------------- */
+  document.documentElement.classList.add("js");
+
   function boot() {
     document.body.classList.add("loaded");
   }
@@ -229,7 +231,7 @@
     lbImg.src = btn.getAttribute("data-full");
     lbImg.alt = btn.getAttribute("data-title") || "Certificate";
     lbTitle.textContent = btn.getAttribute("data-title") || "";
-    lbPdf.href = btn.getAttribute("data-pdf") || "#";
+    lbPdf.href = btn.getAttribute("data-target") || btn.getAttribute("data-pdf") || "#";
     lb.classList.add("open");
     lockScroll(true);
     setTimeout(function () { var c = $("#lb-close"); if (c) c.focus(); }, 120);
@@ -242,6 +244,10 @@
     if (lastFocus) lastFocus.focus();
   }
   $$(".cert").forEach(function (c) {
+    if (!c.getAttribute("data-target")) {
+      var thumb = c.querySelector(".cert-thumb img");
+      if (thumb && thumb.src) c.setAttribute("data-target", thumb.src);
+    }
     c.addEventListener("click", function () { openLb(c); });
   });
   if (lb) {
@@ -499,7 +505,9 @@
       }
       if (cmd === "ls") { print("about  skills  projects  certs  contact  resume.pdf  secrets/"); return; }
       if (cmd === "resume") {
-        print('Opening résumé… <a href="/app/static/docs/Ashish-Dash-Resume.pdf" target="_blank" style="color:#D9F25C;text-decoration:underline">click here if nothing happens</a>');
+        var rs = document.getElementById("resume-link");
+        if (rs) { print("Opening résumé… " + u("download started")); rs.click(); }
+        else { print("Résumé is linked from the hero and contact sections ↑"); }
         return;
       }
       if (cmd === "sudo") { print("Nice try. But this portfolio is already root-level adorable."); return; }

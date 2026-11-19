@@ -123,6 +123,10 @@ body.cursor-hover #cursor{transform:scale(0)}
   transition:width .1s linear;
 }
 
+body:not(.js) .hero-anim,
+body:not(.js) .photo-enter,
+body:not(.js) .rv{opacity:1;transform:none}
+
 /* ==========================================================================
    NAV
    ========================================================================== */
@@ -255,6 +259,7 @@ body.nav-open .burger i::after{top:0;transform:rotate(-45deg)}
 .hero-underline{position:absolute;left:-2%;bottom:-.12em;width:104%;height:.18em;overflow:visible}
 .hero-underline path{fill:none;stroke:var(--teal);stroke-width:5;stroke-linecap:round;stroke-dasharray:620;stroke-dashoffset:620}
 body.loaded .hero-underline path{animation:draw 1.5s .9s var(--ease) forwards}
+body:not(.js) .hero-underline path{stroke-dashoffset:0}
 @keyframes draw{to{stroke-dashoffset:0}}
 
 .hero-tagline{
@@ -493,8 +498,9 @@ body.loaded .hero-underline path{animation:draw 1.5s .9s var(--ease) forwards}
 .skill:hover .skill-quip{color:var(--lime)}
 .skill:hover .skill-name{color:var(--lime)}
 .bar{grid-column:1/-1;height:3px;background:#2C2822;border-radius:99px;overflow:hidden;margin-top:2px}
-.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--orange),var(--lime));transition:width 1.4s var(--ease)}
-.skills.in .bar i{width:var(--w)}
+.bar i{display:block;height:100%;width:var(--w);border-radius:99px;background:linear-gradient(90deg,var(--orange),var(--lime));transition:width 1.4s var(--ease)}
+.js .bar i{width:0}
+.js .skills.in .bar i{width:var(--w)}
 
 .tools{margin-top:clamp(40px,5vw,64px);padding-top:30px;border-top:1px solid #2C2822}
 .tools-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
@@ -831,12 +837,12 @@ body.loaded .hero-underline path{animation:draw 1.5s .9s var(--ease) forwards}
 /* ==========================================================================
    REVEAL
    ========================================================================== */
-.rv{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease), transform .9s var(--ease)}
-.rv.in{opacity:1;transform:none}
+.js .rv{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease), transform .9s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
 .rv-d1{transition-delay:.08s}.rv-d2{transition-delay:.16s}.rv-d3{transition-delay:.24s}.rv-d4{transition-delay:.32s}
 
 /* hero entrance */
-.hero-anim{opacity:0;transform:translateY(20px)}
+.js .hero-anim{opacity:0;transform:translateY(20px)}
 body.loaded .hero-anim{animation:heroIn 1s var(--ease) forwards}
 body.loaded .hero-anim.d1{animation-delay:.08s}
 body.loaded .hero-anim.d2{animation-delay:.18s}
@@ -844,7 +850,7 @@ body.loaded .hero-anim.d3{animation-delay:.28s}
 body.loaded .hero-anim.d4{animation-delay:.4s}
 body.loaded .hero-anim.d5{animation-delay:.52s}
 @keyframes heroIn{to{opacity:1;transform:none}}
-.photo-enter{opacity:0;transform:rotate(9deg) translateY(30px) scale(.94)}
+.js .photo-enter{opacity:0;transform:rotate(9deg) translateY(30px) scale(.94)}
 body.loaded .photo-enter{animation:photoIn 1.15s .25s var(--ease-bounce) forwards}
 @keyframes photoIn{to{opacity:1;transform:rotate(2.2deg)}}
 

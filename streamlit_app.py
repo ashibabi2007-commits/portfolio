@@ -22,7 +22,7 @@ SITE = ROOT / "static" / "portfolio.html"
 
 st.set_page_config(
     page_title="Ashish Dash — Data Analyst in the making",
-    page_icon=str(ROOT / "static" / "img" / "favicon.png"),
+    page_icon=str(fav) if (fav := ROOT / "static" / "img" / "favicon.png").exists() else "📊",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -68,5 +68,9 @@ if not SITE.exists():
     )
     st.stop()
 
+# static/portfolio.html is fully self-contained: CSS, JS, fonts, images and the
+# printable certificates are inlined as data URIs, and the script ships
+# base64-encoded (Streamlit's sanitiser truncates inline JS at the first "<").
+# Nothing here depends on server.enableStaticServing.
 SITE_HTML = SITE.read_text(encoding="utf-8")
 st.html(SITE_HTML, unsafe_allow_javascript=True)
