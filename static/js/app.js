@@ -228,11 +228,25 @@
   function openLb(btn) {
     if (!lb) return;
     lastFocus = btn;
-    lbImg.src = btn.getAttribute("data-full");
+    var target = btn.getAttribute("data-target") || btn.getAttribute("data-pdf") || "";
+    lbImg.src = target;
     lbImg.alt = btn.getAttribute("data-title") || "Certificate";
     lbTitle.textContent = btn.getAttribute("data-title") || "";
-    lbPdf.href = btn.getAttribute("data-target") || btn.getAttribute("data-pdf") || "#";
+
+    // "Open original": data URI → new tab; plain file → open in new tab;
+    // always also offer a real download as a fallback.
+    if (target) {
+      lbPdf.href = target;
+      lbPdf.setAttribute("target", "_blank");
+      lbPdf.setAttribute("rel", "noopener");
+      lbPdf.setAttribute("download", (btn.getAttribute("data-short") || "certificate")
+        .replace(/[^a-z0-9]+/gi, "-").toLowerCase() + ".jpg");
+    } else {
+      lbPdf.removeAttribute("href");
+    }
+
     lb.classList.add("open");
+    lb.setAttribute("aria-hidden", "false");
     lockScroll(true);
     setTimeout(function () { var c = $("#lb-close"); if (c) c.focus(); }, 120);
     toast("📜", "Credential unlocked", btn.getAttribute("data-short") || "Certificate opened");
@@ -240,15 +254,22 @@
   function closeLb() {
     if (!lb) return;
     lb.classList.remove("open");
+    lb.setAttribute("aria-hidden", "true");
     lockScroll(false);
     if (lastFocus) lastFocus.focus();
   }
+
   $$(".cert").forEach(function (c) {
     if (!c.getAttribute("data-target")) {
       var thumb = c.querySelector(".cert-thumb img");
       if (thumb && thumb.src) c.setAttribute("data-target", thumb.src);
     }
+    c.setAttribute("role", "button");
+    c.setAttribute("tabindex", "0");
     c.addEventListener("click", function () { openLb(c); });
+    c.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openLb(c); }
+    });
   });
   if (lb) {
     $("#lb-close").addEventListener("click", closeLb);
@@ -322,6 +343,59 @@
       if (pokes > 5) pokes = 0;
     });
   }
+
+  /* ---------------------------------------------------------------------
+     9b. Résumé — every trigger downloads, with a tab fallback
+     --------------------------------------------------------------------- */
+  var RESUME_NAME = "Ashish-Dash-Resume.pdf";
+  /* Replaced at build time with the PDF's base64 (Streamlit's sanitiser strips
+     href="data:" from anchors, so we hydrate the link in the browser). */
+  var RESUME_B64 = "__RESUME_B64__";
+
+  var resumeHref = (function () {
+    if (RESUME_B64.indexOf("JVBER") === 0) return "data:application/pdf;base64," + RESUME_B64;
+    var link = document.getElementById("resume-link");
+    return link ? link.getAttribute("href") : "";
+  })();
+
+  // point every résumé trigger at the hydrated document
+  $$("[download], #resume-link, #resume-link-2, #resume-link-3").forEach(function (el) {
+    if (resumeHref) el.setAttribute("href", resumeHref);
+    if (resumeHref && resumeHref.indexOf("data:") === 0) {
+      el.setAttribute("download", RESUME_NAME);
+      el.removeAttribute("target");
+    }
+  });
+
+  function downloadResume(el) {
+    var href = resumeHref || (el && el.getAttribute("href"));
+    if (!href || href === "#") { toast("⚠️", "Résumé unavailable", "Please email ashibabi2007@gmail.com"); return; }
+
+    // 1. data: URI → synthesise a click on a hidden download anchor
+    if (href.indexOf("data:") === 0 || el.hasAttribute("download")) {
+      // 1 & 2. data URI or same-origin file → synthesise a real download click
+      // (unattached anchors are ignored by some engines, so it stays in the DOM)
+      var a = document.createElement("a");
+      a.href = href;
+      a.download = RESUME_NAME;
+      a.rel = "noopener";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 2000);
+    } else {
+      // 3. anything else → open in a tab
+      window.open(href, "_blank", "noopener");
+    }
+    toast("📄", "Résumé on its way", "Check your downloads folder.");
+  }
+
+  $$("[download], #resume-link, #resume-link-2, #resume-link-3").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      downloadResume(el);
+    });
+  });
 
   /* ---------------------------------------------------------------------
      10. Confetti

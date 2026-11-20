@@ -122,3 +122,16 @@ pixel-identical, terminal + lightbox + toasts all working, zero console errors.
 | Push succeeds, `git log` shows 2 commits | You're on the old snapshot | Re-extract the NEW zip over the folder, push again |
 | Push rejected: `fetch first` | GitHub has a commit you don't | `git pull --rebase origin main` then push (don't force) |
 | App still blank after reboot + hard refresh | Bundle on GitHub is still 87 KB | Check Step 3's raw URL |
+
+
+---
+
+## Update: interactivity pass
+
+- **Certificates** — every card opens a 1500 px lightbox (mouse or keyboard); the
+  "Open original" button downloads that certificate.
+- **Résumé** — all three buttons (hero, credentials, contact) plus the terminal
+  `resume` command download `Ashish-Dash-Resume.pdf` (60 KB, verified valid PDF).
+  Works inside Streamlit's iframe because the PDF is carried in the bundle and
+  hydrated by JS — Streamlit's sanitiser strips `href="data:"`, so it's set at runtime.
+- **Project cards** — the ↗ "open" arrows are removed; the status chip remains.

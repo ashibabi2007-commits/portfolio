@@ -202,6 +202,8 @@ body:not(.js) .rv{opacity:1;transform:none}
 .btn.solid-orange:hover{box-shadow:4px 4px 0 var(--ink)}
 .btn.lg{padding:17px 30px;font-size:16px}
 .btn .arw{transition:transform .35s var(--ease)}
+.btn[download] .arw{transition:transform .35s var(--ease), opacity .25s}
+.btn[download]:active .arw{transform:translateY(2px)}
 .btn:hover .arw{transform:translateX(4px)}
 
 .nav-cta{display:inline-flex}
@@ -568,6 +570,7 @@ body:not(.js) .hero-underline path{stroke-dashoffset:0}
 .case-out div b{display:block;font-family:"Fraunces",serif;font-size:23px;font-weight:600;letter-spacing:-.02em;line-height:1}
 .case-out div span{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);display:block;margin-top:6px}
 .case-side{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.case-side{justify-content:center}
 .case-side .status{
   display:inline-flex;align-items:center;gap:7px;
   font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
@@ -575,12 +578,6 @@ body:not(.js) .hero-underline path{stroke-dashoffset:0}
   white-space:nowrap;
 }
 .case-side .status i{width:6px;height:6px;border-radius:50%;background:var(--teal)}
-.case-arrow{
-  width:52px;height:52px;border-radius:50%;border:1.5px solid var(--ink);
-  display:grid;place-items:center;transition:.4s var(--ease);flex:0 0 auto;
-}
-.case:hover .case-arrow{background:var(--ink);color:var(--lime);transform:rotate(45deg)}
-
 /* ==========================================================================
    CERTIFICATIONS
    ========================================================================== */
@@ -882,7 +879,7 @@ body.loaded .photo-enter{animation:photoIn 1.15s .25s var(--ease-bounce) forward
   .facts{grid-template-columns:1fr 1fr}
   .case{grid-template-columns:1fr;gap:18px}
   .case-no{font-size:40px}
-  .case-side{flex-direction:row;align-items:center;justify-content:space-between;width:100%}
+  .case-side{flex-direction:row;align-items:center;justify-content:flex-start;width:100%}
 }
 @media (max-width:760px){
   :root{--shadow-hard:4px 4px 0 var(--ink)}

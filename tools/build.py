@@ -91,17 +91,18 @@ def main() -> int:
             return whole
         return f'{attr}="{data_uri(target)}"'
 
-    # résumé first (must beat the generic inliner), embedded so it downloads
-    # instead of navigating the Streamlit iframe away from the app
+    # Résumé: DOMPurify strips href="data:" from anchors (it only allows data
+    # URIs on img src), so the PDF is hydrated by JS at runtime instead.
     resume = static / "docs" / "Ashish-Dash-Resume.pdf"
-    if resume.exists():
-        body_for_frag = body.replace(
-            'href="/app/static/docs/Ashish-Dash-Resume.pdf"',
-            f'href="{data_uri(resume)}" download="Ashish-Dash-Resume.pdf"',
-        )
-    else:
-        body_for_frag = body
-
+    resume_b64 = (
+        base64.b64encode(resume.read_bytes()).decode("ascii") if resume.exists() else ""
+    )
+    body_for_frag = body
+    # neutralise the résumé anchors so the generic inliner can't turn them into
+    # data: hrefs (DOMPurify strips those); JS hydrates them from RESUME_B64
+    body_for_frag = body_for_frag.replace(
+        'href="/app/static/docs/Ashish-Dash-Resume.pdf"', 'href="#" data-resume="1"'
+    )
     frag_body = re.sub(r'(src|href)="/app/static/([^"]+)"', inline_ref, body_for_frag)
 
     # certificate lightbox: swap the /app/static PDF link for the embedded original
@@ -124,7 +125,10 @@ def main() -> int:
     # Streamlit's sanitiser truncates inline <script> content at the first "<"
     # (kills every `<`, `<=` and `&&` comparison). Ship the script base64-encoded
     # and decode at runtime — the inline content is then pure alphanumerics.
-    js_b64 = base64.b64encode(JS.read_text(encoding="utf-8").encode("utf-8")).decode("ascii")
+    js_src = JS.read_text(encoding="utf-8")
+    if resume_b64:
+        js_src = js_src.replace("__RESUME_B64__", resume_b64)
+    js_b64 = base64.b64encode(js_src.encode("utf-8")).decode("ascii")
 
     fragment = (
         "<style>\n" + frag_fonts + "\n" + style_css + "\n</style>\n\n"
@@ -137,6 +141,8 @@ def main() -> int:
     stand_body = (
         body.replace('src="/app/static/', 'src="')
         .replace('href="/app/static/', 'href="')
+        .replace('href="docs/Ashish-Dash-Resume.pdf" target="_blank" rel="noopener"',
+                 'href="docs/Ashish-Dash-Resume.pdf" download="Ashish-Dash-Resume.pdf"')
     )
     html = HEAD + stand_body + TAIL
 
@@ -182,18 +188,14 @@ def main() -> int:
         return f'{attr}="{data_uri(target)}"'
 
     preview_body = re.sub(r'(src|href)="/app/static/([^"]+)"', inline_ref, body)
-    # résumé is the one document worth carrying inline; the rest stay as files
-    resume = static / "docs" / "Ashish-Dash-Resume.pdf"
-    if resume.exists():
-        preview_body = preview_body.replace(
-            'href="/app/static/docs/Ashish-Dash-Resume.pdf"',
-            f'href="{data_uri(resume)}" download="Ashish-Dash-Resume.pdf"',
-        )
+    # résumé hydration happens in JS (see __RESUME_B64__), keep the plain href
     preview = (
         preview
         + "<style>\n" + inline_fonts + "\n" + style_css + "\n</style>\n"
         + preview_body
-        + "\n<script>\n" + JS.read_text(encoding="utf-8").replace("</script>", "<\\/script>") + "\n</script>\n"
+        + "\n<script>\n"
+        + js_src.replace("</script>", "<\\/script>")
+        + "\n</script>\n"
         + "</body>\n</html>\n"
     )
     prev_out = ROOT / "preview.html"

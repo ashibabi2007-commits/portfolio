@@ -17,10 +17,10 @@ if you type `hire` on your keyboard.
 | **About** | Story + "currently, precisely" card + three field notes |
 | **Skills** | Animated capability bars with honest one-line commentary |
 | **Work** | 5 project case files with filter chips (Data & BI / AI / ML / Engineering) |
-| **Credentials** | All 10 certificates — click any card to open a lightbox with the original PDF |
+| **Credentials** | All 10 certificates — click (or press Enter) any card to open a hi-res lightbox with a download |
 | **Journey** | Non-linear timeline from school → internships → "open to work" |
 | **Playground** | A working terminal: `help`, `whoami`, `skills`, `certs`, `joke`, `chai`, `sudo hire-me` |
-| **Contact** | Email / LinkedIn / GitHub / phone + résumé download |
+| **Contact** | Email / LinkedIn / GitHub / phone + one-click résumé download |
 
 **Extras thrown in:** scroll-progress XP bar, achievement toasts at milestones,
 confetti on `sudo hire-me`, contextual tab titles, custom cursor, grain overlay,
