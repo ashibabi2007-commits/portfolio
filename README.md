@@ -19,6 +19,7 @@ if you type `hire` on your keyboard.
 | **Work** | 5 project case files with filter chips (Data & BI / AI / ML / Engineering) |
 | **Credentials** | All 10 certificates — click (or press Enter) any card to open a hi-res lightbox with a download |
 | **Journey** | Non-linear timeline from school → internships → "open to work" |
+| **Teaching** | Three real classroom photos — live ML sessions, hands-up moments, what's actually taught |
 | **Playground** | A working terminal: `help`, `whoami`, `skills`, `certs`, `joke`, `chai`, `sudo hire-me` |
 | **Contact** | Email / LinkedIn / GitHub / phone + one-click résumé download |
 

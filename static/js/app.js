@@ -510,7 +510,7 @@
           "Fun facts, professionally documented:",
           " · Machine Learning Lead at the Code Communicators club.",
           " · Has built & sold websites to local shops and restaurants.",
-          " · Teaches juniors Python and ML — yes, for free.",
+          " · Runs live ML sessions for juniors — pandas, sklearn, and honest results.",
           " · Participates in hackathons the way other people watch series."
         ];
       },
